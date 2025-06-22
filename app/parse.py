@@ -19,18 +19,26 @@ class Course:
     topics: int = 0
 
 
-async def get_course_details(client: httpx.AsyncClient, url: str, name: str) -> Course:
+async def get_course_details(
+    client: httpx.AsyncClient,
+    url: str, name: str
+) -> Course:
     resp = await client.get(url)
     soup = BeautifulSoup(resp.content, "lxml")
-    desc = soup.find("p", class_="typography_textMain__oRJ69 CourseModulesList_aboutCourse__gmavO")
-    duration_div = soup.find("div", class_="c-text-dark typography_microMedium__IGlfO", string=re.compile(r"місяц"))
+    desc = soup.find("p", class_="typography_textMain__oRJ69 CourseModulesList_aboutCourse__gmavO")  # noqa
+    duration_div = soup.find("div", class_="c-text-dark typography_microMedium__IGlfO",
+                             string=re.compile(r"місяц"))  # noqa
     duration = duration_div.text.strip() if duration_div else ""
 
-    modules = len(soup.find_all("div", class_="CourseModulesList_moduleListItem__b8AY9"))
+    modules = len(
+        soup.find_all("div", class_="CourseModulesList_moduleListItem__b8AY9")
+    )
 
     topics = 0
-    for p in soup.find_all("p", class_="CourseModulesList_topicsCount__H_fv3 typography_textMain__oRJ69"):
-        match = re.search(r"(\d+)", p.text)
+    for teg_p in soup.find_all(
+        "p", class_="CourseModulesList_topicsCount__H_fv3 typography_textMain__oRJ69"
+    ):
+        match = re.search(r"(\d+)", teg_p.text)
         if match:
             topics += int(match.group(1))
 
@@ -54,7 +62,7 @@ async def get_all_courses() -> List[Course]:
         tasks = [
             get_course_details(
                 client,
-                f"{BASE_URL}{href}" if href and not href.startswith("http") else href,
+                f"{BASE_URL}{href}" if href and not href.startswith("http") else href,  # noqa
                 a.text.strip()
             )
             for a in course_links
@@ -63,10 +71,12 @@ async def get_all_courses() -> List[Course]:
         return await asyncio.gather(*tasks)
 
 
-def save_courses_to_csv(courses, filename="courses.csv"):
+def save_courses_to_csv(courses: list, filename: str = "courses.csv") -> None:
     with open(filename, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
-        writer.writerow(["Name", "Description", "Duration", "Modules", "Topics"])
+        writer.writerow(
+            ["Name", "Description", "Duration", "Modules", "Topics"]
+        )
         for course in courses:
             writer.writerow([
                 course.name,
@@ -77,7 +87,7 @@ def save_courses_to_csv(courses, filename="courses.csv"):
             ])
 
 
-def main():
+def main() -> None:
     courses = asyncio.run(get_all_courses())
     save_courses_to_csv(courses)
 
