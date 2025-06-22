@@ -43,7 +43,7 @@ async def get_course_details(client: httpx.AsyncClient, url: str, name: str) -> 
     )
 
 
-async def parse_home_page() -> List[Course]:
+async def get_all_courses() -> List[Course]:
     async with httpx.AsyncClient(timeout=30.0) as client:
         resp = await client.get(BASE_URL)
         soup = BeautifulSoup(resp.content, "lxml")
@@ -78,7 +78,7 @@ def save_courses_to_csv(courses, filename="courses.csv"):
 
 
 def main():
-    courses = asyncio.run(parse_home_page())
+    courses = asyncio.run(get_all_courses())
     save_courses_to_csv(courses)
 
 

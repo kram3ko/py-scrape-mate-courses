@@ -1,3 +1,5 @@
+import asyncio
+
 from app.parse import get_all_courses
 
 FOR_SURE_THIS_COURSES = [
@@ -12,7 +14,7 @@ FOR_SURE_THIS_COURSES = [
 
 
 def test_get_all_courses():
-    all_courses = get_all_courses()
+    all_courses = asyncio.run(get_all_courses())
 
     course_names = [course.name for course in all_courses]
 
